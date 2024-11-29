@@ -1,0 +1,155 @@
+/* General Styles */
+body {
+    margin: 0;
+    font-family: 'Arial', sans-serif;
+    background: #000;
+    color: #fff;
+    overflow-x: hidden;
+}
+
+.container {
+    width: 90%;
+    max-width: 1200px;
+    margin: 0 auto;
+    text-align: center;
+}
+
+/* Header Section */
+.hero {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background: linear-gradient(135deg, #0d0d0d, #1a1a1a);
+    animation: fadeIn 2s;
+}
+
+.logo {
+    font-size: 3rem;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 5px;
+    color: #fff;
+    animation: glow 2s infinite alternate;
+}
+
+.logo .highlight {
+    color: #00ffcc;
+    text-shadow: 0 0 10px #00ffcc, 0 0 20px #00ffcc;
+}
+
+.tagline {
+    margin-top: 1rem;
+    font-size: 1.2rem;
+    color: #aaa;
+}
+
+/* Features Section */
+.features {
+    padding: 4rem 0;
+    background: #111;
+    animation: slideIn 1.5s ease-out;
+}
+
+.features h2 {
+    font-size: 2rem;
+    color: #00ffcc;
+    margin-bottom: 1rem;
+}
+
+.features p {
+    line-height: 1.6;
+    color: #bbb;
+}
+
+/* Call to Action Section */
+.cta {
+    padding: 4rem 0;
+    background: linear-gradient(135deg, #00ffcc, #00777d);
+    animation: pulse 2s infinite alternate;
+}
+
+.cta h2 {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+    color: #000;
+}
+
+.cta p {
+    font-size: 1rem;
+    margin-bottom: 2rem;
+    color: #222;
+}
+
+.cta-button {
+    display: inline-block;
+    padding: 1rem 2rem;
+    font-size: 1rem;
+    background: #000;
+    color: #00ffcc;
+    text-decoration: none;
+    border-radius: 5px;
+    border: 1px solid #00ffcc;
+    transition: transform 0.3s, background 0.3s;
+}
+
+.cta-button:hover {
+    transform: scale(1.1);
+    background: #00ffcc;
+    color: #000;
+}
+
+/* Footer Section */
+footer {
+    background: #0d0d0d;
+    padding: 1rem 0;
+}
+
+footer p {
+    margin: 0;
+    font-size: 0.8rem;
+    color: #666;
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes glow {
+    from {
+        text-shadow: 0 0 10px #00ffcc, 0 0 20px #00ffcc, 0 0 30px #00ffcc;
+    }
+    to {
+        text-shadow: 0 0 20px #00ffcc, 0 0 40px #00ffcc, 0 0 60px #00ffcc;
+    }
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateX(-100%);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes pulse {
+    from {
+        background: #00777d;
+    }
+    to {
+        background: #00ffcc;
+    }
+}
+
