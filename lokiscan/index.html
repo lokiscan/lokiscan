@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LokiSCAN - 3D Geo Reconstruction</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+        }
+        #container {
+            width: 100%;
+            height: 500px;
+            margin: auto;
+        }
+        input[type="file"] {
+            margin: 10px;
+            padding: 10px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <h1>LokiSCAN - 3D Geo Reconstruction</h1>
+    <p>Upload images from four different angles (front, back, left, right) to generate a 3D model.</p>
+    <p>How my custom image object shape detection works: it's a simple, yet powerful, brightness-based tracing logic background removal with a specific treshold.</p>
+
+    <input type="file" id="frontImage" accept="image/*">
+    <input type="file" id="backImage" accept="image/*">
+    <input type="file" id="leftImage" accept="image/*">
+    <input type="file" id="rightImage" accept="image/*">
+    <br>
+    <button onclick="generate3DModel()">Generate 3D Model</button>
+
+    <div id="container"></div>
+
+    <canvas id="hiddenCanvas" style="display: none;"></canvas>
+
+    <script>
+        let scene, camera, renderer, cube;
+        let textures = { front: null, back: null, left: null, right: null };
+
+        // Initialize the 3D scene
+        function init() {
+            scene = new THREE.Scene();
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            renderer = new THREE.WebGLRenderer();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            document.getElementById('container').appendChild(renderer.domElement);
+
+            const geometry = new THREE.BoxGeometry();
+            const material = new THREE.MeshBasicMaterial({ color: 0xcccccc, wireframe: true });
+            cube = new THREE.Mesh(geometry, material);
+            scene.add(cube);
+
+            camera.position.z = 5;
+
+            animate();
+        }
+
+        // Animation loop
+        function animate() {
+            requestAnimationFrame(animate);
+            cube.rotation.x += 0.01;
+            cube.rotation.y += 0.01;
+            renderer.render(scene, camera);
+        }
+
+        // Process the image to trace shapes and remove the background
+        function processImage(file, callback) {
+            const canvas = document.getElementById('hiddenCanvas');
+            const ctx = canvas.getContext('2d');
+            const img = new Image();
+
+            img.onload = () => {
+                canvas.width = img.width;
+                canvas.height = img.height;
+                ctx.drawImage(img, 0, 0);
+
+                // Extract image data
+                const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                const data = imageData.data;
+
+                // Simple edge detection (Lokium logic)
+                for (let i = 0; i < data.length; i += 4) {
+                    const brightness = 0.3 * data[i] + 0.59 * data[i + 1] + 0.11 * data[i + 2];
+                    if (brightness > 115) { // Threshold
+                        data[i + 3] = 0; // Set transparency
+                    }
+                }
+                ctx.putImageData(imageData, 0, 0);
+
+                // Export the processed image
+                callback(canvas.toDataURL());
+            };
+
+            const reader = new FileReader();
+            reader.onload = (e) => (img.src = e.target.result);
+            reader.readAsDataURL(file);
+        }
+
+        // Load texture and process the image
+        function loadTexture(side, fileInputId) {
+            const fileInput = document.getElementById(fileInputId);
+            const file = fileInput.files[0];
+            if (file) {
+                processImage(file, (processedImage) => {
+                    const texture = new THREE.TextureLoader().load(processedImage);
+                    textures[side] = texture;
+                    if (Object.values(textures).every(texture => texture !== null)) {
+                        generate3DModel();
+                    }
+                });
+            }
+        }
+
+        // Generate the 3D model using uploaded textures
+        function generate3DModel() {
+            const materials = [
+                new THREE.MeshBasicMaterial({ map: textures.right }),
+                new THREE.MeshBasicMaterial({ map: textures.left }),
+                new THREE.MeshBasicMaterial({ color: 0xcccccc }),
+                new THREE.MeshBasicMaterial({ color: 0xcccccc }),
+                new THREE.MeshBasicMaterial({ map: textures.front }),
+                new THREE.MeshBasicMaterial({ map: textures.back })
+            ];
+
+            cube.material = materials;
+            cube.geometry.needsUpdate = true;
+        }
+
+        // Call init function to set up the scene
+        init();
+
+        // Add event listeners to image inputs
+        document.getElementById('frontImage').addEventListener('change', () => loadTexture('front', 'frontImage'));
+        document.getElementById('backImage').addEventListener('change', () => loadTexture('back', 'backImage'));
+        document.getElementById('leftImage').addEventListener('change', () => loadTexture('left', 'leftImage'));
+        document.getElementById('rightImage').addEventListener('change', () => loadTexture('right', 'rightImage'));
+        
+    </script>
+        
+</body>
+</html>
